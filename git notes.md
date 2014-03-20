@@ -55,11 +55,6 @@ Now that we have our repository all setup we could start adding some changes to 
 		
 	This command tells you what you have yet to commit. Meaning any files you added or changed and have not used the "add" command to notify the repository of change. 
 	
-###Understanding Git (READ THIS)
-
-- While these commands will get you by 90% of the time, you may find yourself frustrated when you make some changes to a file, add them to the repos, commit them, but the changes you made have not showed up.
-####So what gives?
-	- the reason for this behavior is simple git tracks changes in files, not the files themselves. So **everytime** you make a change to the file add and commit it to the repository! 
 
 ##Seeing your history 
 ***

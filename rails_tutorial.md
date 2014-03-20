@@ -190,8 +190,285 @@ Key :error has value "It failed."
 - We can write to main ruby classes like string. 
 
 ####Our own user class 
+example_user.rb
+//completely useless 
+
+#Chapter 5
+***
+
+##Adding in some css to your page 
+
+- The tutorial first goes into adding a general nav-bar to the top of the page. 
+
+- They accomplish this by editing the application.html.erb file in app/view/layouts
+
+```
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= full_title(yield(:title)) %></title>
+    <%= stylesheet_link_tag "application", media: "all",
+                                           "data-turbolinks-track" => true %>
+    <%= javascript_include_tag "application", "data-turbolinks-track" => true %>
+    <%= csrf_meta_tags %>
+    <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <header class="navbar navbar-fixed-top navbar-inverse">
+      <div class="navbar-inner">
+        <div class="container">
+          <%= link_to "sample app", '#', id: "logo" %>
+          <nav>
+            <ul class="nav pull-right">
+              <li><%= link_to "Home",    '#' %></li>
+              <li><%= link_to "Help",    '#' %></li>
+              <li><%= link_to "Sign in", '#' %></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </header>
+    <div class="container">
+      <%= yield %>
+    </div>
+  </body>
+</html>
+```
+
+- in this file we added some html related to bootstrap. (formatted normally)
+- we used some embeded ruby to add in the links to the Home, Help, and sign in. 
+
+- Then we added in some html in our home page 
+(This is all from the home page, all the other stuff is basic bootstrap/css/html)
+- Something interesting to note:
+
+		  <%= link_to "Sign up now!", '#', class: "btn btn-large btn-primary" %>
+here we used the link to add a link to a button... so link_to works for more than hyperlinks 
+
+		<%= link_to image_tag("rails.png", alt: "Rails"), 'http://rubyonrails.org/' %>
+here we used it to display the rails website to the rails image. 
+ 
 
 
+- Gemfile stuff 
+		
+		gem 'bootstrap-sass', '2.3.2.0'
+add that badboy to your Gemfile and bundle install 
+
+- Assset pipeline 
+
+		    config.assets.precompile += %w(*.png *.jpg *.jpeg *.gif)
+add that to your config/application.rb file 
+
+- Now we're ready to add in some bootstrap to our files go to app/assets and vim a new file called 
+called custom.css.scss
+
+		@import bootstrap; 
+	brings in the bootstrap gem to all the pages. 
+
+- We will use this custom.css.scss file to make universal changes across the application 
+
+##The asset pipeline 
+
+- Three principles to understand asset directories, manifest files, preprocessor engines 
+
+###Manifest files
+
+- tells rails how to combine your assets into single files 
+
+- located inside app/assets/stylesheets/application.css
+
+		*= require_tree .
+		*= require_self
+tells the application to include all the css files app/assests/stylesheets directory and itself 
+
+###Preprocessor engines 
+
+- Takes the erb, coffee, and scss and renders them into regular 
+
+###Assets Libraries
+
+- app/assets: assets specific to the present application
+
+- lib/assets: assets for libraries written by your dev team
+
+- vendor/assets: assets from third-party vendors
+
+##Sass stuff
+
+- like css, only a little better, 
 
 
+##Links 
+
+- just add a route to the link_to mesage 
+
+		<%= link_to "About", about_path %>
+		
+#Chapter 6
+*** 
+*Overall idea: Create a working model for the user*
+
+- Rails does a lot of the initial set up (creating boiler plate code for the model, creating databases for us, and the testing suite) all we have to do use a simple command 
+
+		rails generate model User param1:type_of_param param2:type_of_param
+
+- This inherently runs a migration, which provides a way to alter the structure of the database. The migrations help keep a valid table of our model.
+
+```
+		located in db/migrate/[timestamp]_create_users.rb
+		
+			class CreateUsers < ActiveRecord::Migration
+  				def change
+    				create_table :users do |t|
+      				t.string :name
+      				t.string :email
+      				t.timestamps
+    			end
+  			end
+		end 
+ 
+	
+```
+- To run the migration that creates the database in db/development.sqlite3
+
+		 bundle exec rake db:migrate
+ 
+##CRUD
+
+- Create, Read (find), Update, Destroy
+	- these methods do exactly what the say they do with items in your database
+	
+	Some examples: 
+	
+	**Creating**
+	
+	```	
+	user = User.create(name:"faiq", email:"faiqrazarizvi@yahoo.com")
+	```
+	
+	**Finding** 
+	
+	```
+	User.find_by_email("mhartl@example.com")
+	
+	User.find_by(email:"faiqrazarizvi@yahoo.com")
+	
+	User.all
+	
+	```
+	
+	**Updating** 
+	
+	```
+	user.update_attributes(name: "The Dude", email: "dude@abides.org")
+	
+	```
 			
+	**Destroy**
+	
+	```
+	user.destroy
+	```
+	
+##Validation
+
+###Checking if the fields are empty or not
+
+##### ***Some notes about the validates method ***
+
+- validates takes in an attribute of an object,
+
+```
+validates  :name
+```
+
+- then you can add restrictions on that attribute 
+
+```
+validates :name, presence:true, length: { maximum: 16 }
+``` 
+- Here the restrictions are to check if its present, and to check the length of the attribute 
+
+
+
+
+In my app/models/user.rb just simply add the line! 
+
+	validates :name, presence: true
+	
+###Checking if the length is good
+Same file. Quick validation. 
+
+	validates :name,  presence: true, length: { maximum: 50 }
+	
+###Checking if the email is actually an email
+
+
+- Use regular expressions. 
+
+		
+		VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
+  		validates :email, presence: true, format: { with: VALID_EMAIL_REGEX }
+  		
+- /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i	     full regex
+- /											start of regex
+- \A											match start of a string
+- [\w+\-.]+									at least one word character, plus, hyphen, or dot
+- @											literal “at sign”
+- [a-z\d\-.]+									at least one letter, digit, hyphen, or dot
+- \.											literal dot
+- [a-z]+										at least one letter
+- \z											match end of a string
+- /											end of regex
+- i											case insensitive
+
+###Uniqueness validation 
+
+- To do this we'll be adding the :unique option to the validates method
+
+```
+validates :email, presence: true, format: { with: VALID_EMAIL_REGEX },
+                    uniqueness: { case_sensitive: false }
+```
+
+- We still need to validate uniqueness on the database level, not just the local memory level
+- To achieve this we add a unique index on the emails. We accomplish a change in database structure through migrations. 
+
+		rails generate migration add_index_to_users_email
+
+- We add the following lines in the migration file 
+
+		add_index(:users, :email, {:unique=>true})
+
+- add_index(:table, :column, {:other_options=>true})
+
+- lastly, we're going to make all the emails lowercase so when looking them up with active records in different databases its consistant 
+
+###Adding a Password 
+
+- Again we're adding an attribute to the database so we need to run another migration. 
+- We also need to add in a hashing library 
+
+		rails generate migration add_password_digest_to_users password_digest:string
+
+
+###Having a Password and confirming it
+
+- LITERALLY 1 LINE OF CODE IN YOUR USER MODEL
+
+		has_secure_password
+
+- this line will add a password and a password confirmation field and make sure they are the same
+
+###User Authentication
+
+- We want to find a user by his email, then test whether or not its him with his password, again all taken care of with has_secure_password
+
+
+
+ 
+
+
